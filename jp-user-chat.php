@@ -2,17 +2,14 @@
 /*
 Plugin Name: JP User Chat
 Plugin URI: https://www.derniertec.biz/plugins/jp-user-chat
-Description: This plugin intergrate the chat feature with WordPress users each other.
+Description: This plugin intergrate the chat feature among WordPress users with shortcode.
 Version: 1.0.0
 Author: John Paul O B
 Author URI: https://john@derniertec.biz
 */
 
 register_activation_hook( __FILE__, 'jpChat_activate' );
-register_uninstall_hook( __FILE__, 'jpChat_deactivate' );
-
-function jpChat_activate()
-{
+function jpChat_activate(){
 	
 	global $wpdb;
 	require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
@@ -22,7 +19,7 @@ function jpChat_activate()
 		id bigint(20) NOT NULL auto_increment,
 		sender_id int(15) NOT NULL default 0,
 		receiver_id int(15) NOT NULL default 0,
-		message varchar(255),
+		message text,
 		sent datetime NOT NULL default CURRENT_TIMESTAMP,
 		recd tinyint(2) NOT NULL default 0,
 		PRIMARY KEY  (`id`)
@@ -44,16 +41,39 @@ function jpChat_activate()
 	
 }
 
-function jpChat_deactivate()
-{
+register_uninstall_hook( __FILE__, 'jpChat_deactivate' );
+function jpChat_deactivate(){
+	
 	global $wpdb;
+	
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}jpchat" );
+	
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}jpchat_blockings" );
+	
 }
 
-add_action( 'get_header', 'jpChat_display_message_bubble' );
+add_action( 'init', 'my_script_enqueuer' );
+function my_script_enqueuer() {
+	
+   wp_register_script( "jp_chat_script", WP_PLUGIN_URL.'/jp-user-chat/jp_chat_script.js', array('jquery'), rand (1,10000) );
+   wp_localize_script( 'jp_chat_script', 'jpChat', array( 'ajaxurl' => admin_url( 'admin-ajax.php' )));        
 
-function jpChat_display_message_bubble(){
+   wp_enqueue_script( 'jquery' );
+   wp_enqueue_script( 'jp_chat_script' );
+   
+   wp_enqueue_style('main-styles', WP_PLUGIN_URL.'/jp-user-chat/jp_chat_style.css', array(), rand (1,10000), false);
+
+}
+
+add_shortcode( 'jpchat', 'jpchat' );
+function jpchat( $attr ){
+	
+	$default_atts = array(
+        'sender_id' => get_the_author_ID()
+    );
+	$atts = shortcode_atts( $default_atts, $attr, 'jpchat' );
+	
+	$sender_id = $atts['sender_id'];
 	
 	$nonce = wp_create_nonce("jp_chat_nonce");
 	
@@ -77,10 +97,12 @@ function jpChat_display_message_bubble(){
 	
 	$jp_users = array_unique($jp_users);
 	
-	echo '<div class="jp-container">';
+	$jp_html_output = '';
 	
-	if(!empty(get_the_author_ID())){
-		echo "<a class='jp-open-chat-link' onclick='jp_open_message_box(".get_the_author_ID().");'><img src='".plugins_url()."/jp-user-chat/edit-button.svg'/></a>";
+	$jp_html_output .= '<div class="jp-container">';
+	
+	if(!empty($sender_id)){
+		$jp_html_output .= '<a class="jp-open-chat-link" onclick="jp_open_message_box('.$sender_id.');"><img src="'.plugins_url().'/jp-user-chat/edit-button.svg"/></a>';
 	}
 		
 	$jp_result_counter_html = '';
@@ -89,27 +111,23 @@ function jpChat_display_message_bubble(){
 		$jp_result_counter_html = '<span class="jp-message-counter">'.count($jp_results_count).'</span>';
 	}
 
-	echo '<a onclick="jp_display_message_list();" class="jp-message-list-botton"><span class="jp-message-bubble">
+	$jp_html_output .= '<a onclick="jp_display_message_list();" class="jp-message-list-botton"><span class="jp-message-bubble">
 	<svg fill="currentColor" viewBox="0 0 24 24" width="1em" height="1em" class="x1lliihq x1k90msu x2h7rmj x1qfuztq x198g3q0 x1qx5ct2 xw4jnvo"><path d="M.5 12C.5 5.649 5.649.5 12 .5S23.5 5.649 23.5 12 18.351 23.5 12 23.5c-1.922 0-3.736-.472-5.33-1.308a.63.63 0 0 0-.447-.069l-3.4.882a1.5 1.5 0 0 1-1.828-1.829l.882-3.4a.63.63 0 0 0-.07-.445A11.454 11.454 0 0 1 .5 12zm17.56-1.43a.819.819 0 0 0-1.125-1.167L14 11.499l-3.077-2.171a1.5 1.5 0 0 0-2.052.308l-2.93 3.793a.819.819 0 0 0 1.123 1.167L10 12.5l3.076 2.172a1.5 1.5 0 0 0 2.052-.308l2.931-3.793z"></path></svg>'.$jp_result_counter_html.'</span></a>';
 	
-	echo '</div>';
+	$jp_html_output .= '</div>';
 	
-	?>
-	<div class="jp-msg-list-box" data-nonce="<?php echo $nonce; ?>">
-		<?php
+	$jp_html_output .= '<div class="jp-msg-list-box" data-nonce="'.$nonce.'">';
 
-		foreach( $jp_users as $jp_user ){
-			$jp_user_obj = get_userdata( $jp_user );
-			echo "<p><a onclick='jp_open_message_box(".$jp_user_obj->ID.");'>".get_avatar( $jp_user_obj->ID, 32 ).'<span class="jp-messager-name">'.$jp_user_obj->user_nicename."</span></a></p>";
-		}
-		?>
-	</div>
+	foreach( $jp_users as $jp_user ){
+		$jp_user_obj = get_userdata( $jp_user );
+		$jp_html_output .= '<p><a onclick="jp_open_message_box('.$jp_user_obj->ID.');">'.get_avatar( $jp_user_obj->ID, 32 ).'<span class="jp-messager-name">'.$jp_user_obj->user_nicename.'</span></a></p>';
+	}
+
+	$jp_html_output .= '</div>';
 	
-	<div id="jp-msg-box-container">
-		
-	</div>
+	$jp_html_output .= '<div id="jp-msg-box-container"></div>';
 	
-	<div class="jp-chat-loader">
+	$jp_html_output .= '<div class="jp-chat-loader">
 		<svg version="1.1" id="L4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 100 20" enable-background="new 0 0 0 0" xml:space="preserve">
 			<circle fill="#fff" stroke="none" cx="10" cy="10" r="3">
 				<animate attributeName="opacity" dur="1s" values="0;1;0" repeatCount="indefinite" begin="0.1"></animate>    
@@ -121,9 +139,9 @@ function jpChat_display_message_bubble(){
 				<animate attributeName="opacity" dur="1s" values="0;1;0" repeatCount="indefinite" begin="0.3"></animate>     
 			</circle>
 		</svg>
-	</div>
+	</div>';
 	
-	<?php
+	return $jp_html_output;
 	
 }
 
@@ -149,7 +167,6 @@ function check_blocked($receiver_id){
 }
 
 add_action( 'wp_ajax_jp_send_message', 'jp_send_message' );
-
 function jp_send_message(){
 	
 	if ( !wp_verify_nonce( $_POST['nonce'], "jp_chat_nonce")) {
@@ -224,7 +241,6 @@ function jp_send_message(){
 }
 
 add_action( 'wp_ajax_jp_report_user', 'jp_report_user' );
-
 function jp_report_user(){
 	
 	if ( !wp_verify_nonce( $_POST['nonce'], "jp_chat_nonce")) {
@@ -274,7 +290,6 @@ function jp_report_user(){
 }
 
 add_action( 'wp_ajax_jp_block_user', 'jp_block_user' );
-
 function jp_block_user(){
 	
 	if ( !wp_verify_nonce( $_POST['nonce'], "jp_chat_nonce")) {
@@ -344,7 +359,6 @@ function jp_block_user(){
 }
 
 add_action( 'wp_ajax_jp_read_messages', 'jp_read_messages' );
-
 function jp_read_messages(){
 	
 	if ( !wp_verify_nonce( $_POST['nonce'], "jp_chat_nonce")) {
@@ -400,9 +414,7 @@ function jp_read_messages(){
 							<path d="M 5,5 L 35,35 M 35,5 L 5,35" style="stroke-width: 5px;stroke:rgb(255,255,255)"/>
 						</svg>
 					</div>
-					<div class="jp-block-btn jp-header-btns" onclick="jp_block_user('<?php echo $jp_send_to; ?>');" title="<?php echo $jp_block_btn_title; ?>">						
-						<span><img src="<?php echo plugins_url(); ?>/jp-user-chat/block-button.png"/></span>
-					</div>
+					<div class="jp-block-btn jp-header-btns" onclick="jp_block_user('<?php echo $jp_send_to; ?>');" title="<?php echo $jp_block_btn_title; ?>"></div>
 					<label class="jp-display-when" title="Display Date and Time"> 
 						<input type="checkbox" name="jp-display-when" title="Display Date and Time" onClick="jp_display_when_selector(this, <?php echo $jp_send_to; ?>);">
 						<span class="jp-custom-checkbox"></span> 
@@ -428,12 +440,11 @@ function jp_read_messages(){
 		<?php
 	}
 	
-	
 	wp_die();
 	
 }
-add_action( 'wp_ajax_jp_fetchData', 'jp_fetchData' );
 
+add_action( 'wp_ajax_jp_fetchData', 'jp_fetchData' );
 function jp_fetchData(){
 	
 	if ( !wp_verify_nonce( $_POST['nonce'], "jp_chat_nonce")) {
@@ -441,10 +452,8 @@ function jp_fetchData(){
 		exit;
 	}
 	
-	// $jp_send_to = 4;
 	$jp_output = array();
 	$jp_output['response'] = 'no-data';
-	// $jp_output['new_messages'] = 'no';
 	
 	$jp_send_to = intval( $_POST['jp_send_to'] );
 		
@@ -485,9 +494,7 @@ function jp_fetchData(){
 
 				
 				if( 0 == $jp_result->recd ){
-					
-					// $jp_output['new_messages'] = 'yes';
-					
+										
 					$wpdb->update($jp_tablename, array('recd'=>1), array('id'=>$jp_result->id));
 					
 				}
@@ -522,19 +529,5 @@ function jp_fetchData(){
 	
 	wp_die();
 	
-}
-
-add_action( 'init', 'my_script_enqueuer' );
-
-function my_script_enqueuer() {
-	
-   wp_register_script( "jp_chat_script", WP_PLUGIN_URL.'/jp-user-chat/jp_chat_script.js', array('jquery'), rand (1,10000) );
-   wp_localize_script( 'jp_chat_script', 'jpChat', array( 'ajaxurl' => admin_url( 'admin-ajax.php' )));        
-
-   wp_enqueue_script( 'jquery' );
-   wp_enqueue_script( 'jp_chat_script' );
-   
-   wp_enqueue_style('main-styles', WP_PLUGIN_URL.'/jp-user-chat/jp_chat_style.css', array(), rand (1,10000), false);
-
 }
 ?>

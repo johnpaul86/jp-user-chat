@@ -48,7 +48,7 @@ function jp_block_user(userId){
 				jQuery('.jp-chat-box-user-'+userId+' .jp-chat-header .jp-block-btn').attr('title','Unblock this user!');
 				jQuery('.jp-chat-box-user-'+userId+' .jp-chat-alerts').html('<p class="success jp-blocked-active">User blocked!</p>');
 				jQuery('.jp-chat-box-user-'+userId+' .jp-chat-alerts').slideDown('slow');
-				var tmp = '<div class="jp-report-box"><input type="text" class="jp-block-report" placeholder="Report User"/><input type="button" value="ok" onClick="jp_send_report(this);"/></div>';
+				var tmp = '<div class="jp-report-box"><input type="text" class="jp-block-report" placeholder="Report User" maxlength="254"/><input type="button" value="ok" onClick="jp_send_report(this);"/></div>';
 				jQuery(tmp).insertAfter('.jp-chat-box-user-'+userId+' .jp-chat-header');
 			}else{
 				jQuery('.jp-chat-box-user-'+userId).removeClass('jp-user-blocked');
@@ -187,9 +187,11 @@ function jp_send_btn_action(ths){
 				}, 0);
 				jQuery('.jp-chat-box-user-'+jp_send_to+' .jp-textarea').val('');
 				
+				jQuery('.jp-chat-box-user-'+jp_send_to+' .jp-textarea').removeClass('shadow-box');
+				
 			}else{
 				
-				jQuery('.jp-chat-box-user-'+jp_send_to+' .jp-textarea').css('border','1px solid red');
+				jQuery('.jp-chat-box-user-'+jp_send_to+' .jp-textarea').addClass('shadow-box');
 				
 			}
 		}

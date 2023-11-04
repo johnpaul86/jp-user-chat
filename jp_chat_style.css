@@ -27,7 +27,7 @@
 	border-radius: 18px;
 	word-wrap: break-word;
 	color:#fff;
-	font-size: .9375rem;
+	font-size: 13px;
 	line-height: 1.3333;
 	font-family: Helvetica, Arial, sans-serif;
 }
@@ -40,11 +40,20 @@
 	position:relative;
 }
 .jp_send_btn{
-	padding: 10px;
+	padding: 8px;
     border-radius: 50%;
-	top: 20px;
-	right: 5px;
+    top: 20px;
+    right: 5px;
     position: absolute;
+    display: block;
+    width: 35px;
+    height: 35px;
+	box-sizing: border-box;
+}
+.jp-textarea.shadow-box{
+	box-shadow: 0px 0px 4px 1px rgba(255,0,0,0.85);
+	-webkit-box-shadow: 0px 0px 4px 1px rgba(255,0,0,0.85);
+	-moz-box-shadow: 0px 0px 4px 1px rgba(255,0,0,0.85);
 }
 .jp_send_btn:hover{
 	cursor:pointer;
@@ -55,8 +64,8 @@
 }
 .jp-message-bubble .jp-message-counter{
 	position: absolute;
-    bottom: -5px;
-    right: -5px;
+    bottom: -10px;
+    right: -10px;
     z-index: 99999999;
     background: red;
     padding: 4px;
@@ -67,11 +76,14 @@
 .jp-message-bubble svg{
 	fill:#e4e6eb;
 }
-.jp-message-bubble{
+.jp-message-list-botton{
 	background:#3a3b3c;
-	padding:8px;
+	padding:7px 10px;
 	border-radius:50%;
-	display:inline-block;
+	display:block;
+	width: 35px;
+    height: 35px;
+	box-sizing: border-box;
 }
 .jp-msg-list-box{
 	max-height: 400px;
@@ -84,24 +96,25 @@
     background: rgb(36, 37, 38);
     color: rgb(255, 255, 255);
 }
-.jp-msg-list-box p{
+div.jp-msg-list-box p{
+	margin-top:0px;
 	margin-bottom:0px;
 }
-.jp-msg-list-box a{
-	display: inline-flex;
+div.jp-msg-list-box a{
+	display: flex;
     align-items: center;
     text-decoration: none;
     padding: 15px;
 	cursor:pointer;
 }
-.jp-msg-list-box a:hover{
+div.jp-msg-list-box a:hover{
 	background:#000;
 }
-.jp-msg-list-box .jp-messager-name{
+div.jp-msg-list-box .jp-messager-name{
 	color:#fff;
 	margin-left:10px;
 }
-.jp-msg-list-box .avatar{
+div.jp-msg-list-box .avatar{
 	border-radius:50%;
 }
 .jp-chat-box .jp-chat-header{
@@ -121,14 +134,23 @@
 	padding:5px;
 	color:#fff;
 	line-height:32px;
+	font-size:15px;
 }
 .jp-chat-box .jp-chat-header .jp-header-btns{
-	display:inline-block;
+	display:block;
+	width: 35px;
+    height: 35px;
     padding: 8px;
     border-radius: 50%;
 	cursor:pointer;
 	float:right;
 	margin-right:5px;
+	box-sizing: border-box;
+}
+.jp-chat-box .jp-chat-header .jp-block-btn.jp-header-btns{
+	background-image:url('block-button.png');
+	background-repeat: no-repeat;
+    background-position: center;
 }
 .jp-chat-box .jp-chat-header .jp-header-btns.jp-block-btn img{
 	width:20px;
@@ -139,10 +161,10 @@
 	float:left;
 }
 .jp-chat-box .jp-chat-header .jp-header-btns:hover{
-	background: rgb(116 116 116);
+	background-color: rgb(116,116,116);
 }
 .jp-chat-box.jp-user-blocked .jp-chat-header .jp-header-btns.jp-block-btn{
-	background:#046bd2;
+	background-color:#046bd2;
 }
 .jp-messages.jp-sender span{
 	background-color:#0084ff;
@@ -164,13 +186,24 @@
 	display:inherit;
 	width:100%;
 }
+.jp-chat-box .jp-textarea:focus,
+.jp-chat-box .jp-textarea:active,
+.jp-chat-box .jp-textarea:hover{
+	outline:0;
+	border:none;
+}
 .jp-chat-box .jp-textarea{
 	color:#fff;
+	font-size:13px;
 	background-color:#3a3b3c;
 	border:none;
 	overflow: hidden;
 	resize: none;
 	border-radius:10px;
+	margin-left: 3px;
+    margin-bottom: 3px;
+	height:67px;
+	width:calc(100% - 52px);
 }
 .jp-sentAt{
 	color: #fff;
@@ -178,24 +211,28 @@
 }
 .jp-display-when{
 	float:right;
-}
-.jp-display-when { 
 	display: block; 
 	position: relative; 
 	padding-left: 20px;
     margin-top: 8px;
 	cursor: pointer; 
-	font-size: 20px; 
+	font-size: 20px;
+	line-height:20px;
 } 
 .jp-open-chat-link{
 	background:#3a3b3c;
-	padding: 5px;
+	padding: 2px 8px;
     border-radius: 50%;
 	cursor:pointer;
-	margin-right:10px;
+	margin-right:3px;
+	margin-bottom:3px;
+	width: 35px;
+    height: 35px;
+    display: block;
+	box-sizing: border-box;
 }
 .jp-open-chat-link:hover,
-.jp-message-list-botton:hover span{
+.jp-message-list-botton:hover{
 	background:#000;
 	cursor:pointer;
 }
@@ -212,7 +249,7 @@
 } 
 
 /* Hide the default checkbox */ 
-input[type=checkbox] { 
+.jp-display-when input[type=checkbox] { 
 	visibility: hidden; 
 } 
   
@@ -278,7 +315,7 @@ shown when checkbox is checked */
 }
 .jp-report-box{
 	position: absolute;
-    display: inline-flex;
+    display: inline-block;
     align-items: center;
     flex-direction: row;
     width: 100%;
@@ -291,12 +328,14 @@ shown when checkbox is checked */
 	padding:4px;
 }
 .jp-report-box input[type=button]{
-	width:40px;
-	height:40px;
+	width: 35px;
+    height: 35px;
+    box-sizing: border-box;
 	padding:5px;
     border-radius: 50%;
     text-align:center;
     line-height: 0px;
+	margin-top:8px;
 }
 .jp-report-box input[type=text]{
 	width: calc(100% - 50px);
@@ -320,7 +359,7 @@ shown when checkbox is checked */
 	checkmark */ 
 .jp-display-when .jp-custom-checkbox:after { 
 	left: 3px;
-    bottom: 20px;
+    bottom: 15px;
     width: 6px;
     height: 5px;
     color: #999999;
