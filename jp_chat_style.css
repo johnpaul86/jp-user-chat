@@ -262,15 +262,10 @@ div.jp-msg-list-box .avatar{
 .jp-open-chat-link img{
 	width:20px;
 	height:20px;
-} 
-
-/* Hide the default checkbox */ 
+}
 .jp-display-when input[type=checkbox] { 
 	visibility: hidden; 
-} 
-  
-/* creating a custom checkbox based 
-	on demand */ 
+}
 .jp-custom-checkbox { 
 	position: absolute; 
 	top: 0; 
@@ -278,28 +273,16 @@ div.jp-msg-list-box .avatar{
 	height: 20px; 
 	width: 20px; 
 	background-color: rgb(116 116 116); 
-} 
-  
-/* specify the background color to be 
-shown when hovering over checkbox */ 
+}
 .jp-display-when:hover input ~ .geekmark { 
 	background-color: #fff; 
-} 
-  
-/* specify the background color to be 
-shown when checkbox is active */ 
+}
 .jp-display-when input:active ~ .jp-custom-checkbox { 
 	background-color: #fff; 
-} 
-  
-/* specify the background color to be 
-shown when checkbox is checked */ 
+}
 .jp-display-when input:checked ~ .jp-custom-checkbox { 
 	background-color: #474747; 
-} 
-  
-/* checkmark to be shown in checkbox */ 
-/* It is not be shown when not checked */ 
+}
 .jp-custom-checkbox:after { 
 	content: "\2713"; 
 	position: absolute; 
@@ -325,7 +308,6 @@ shown when checkbox is checked */
 .jp-chat-alerts .jp-blocked-active{
 	color:#db0000;
 }
-
 .jp-chat-alerts .jp-blocked-inactive{
 	color:#00dd00;
 }
@@ -363,16 +345,9 @@ shown when checkbox is checked */
 	background-color: #474747; 
 	color:#fff;
 }
-
-
-/* display checkmark when checked */ 
 .jp-display-when input:checked ~ .jp-custom-checkbox:after { 
 	color:#fff;
-} 
-  
-/* styling the checkmark using webkit */ 
-/* creating a square to be the sign of 
-	checkmark */ 
+}
 .jp-display-when .jp-custom-checkbox:after { 
 	left: 3px;
     bottom: 15px;
@@ -382,66 +357,47 @@ shown when checkbox is checked */
 }
 .jp-sentAt{
 	display:none;
-}	
-		
-/* Works on Firefox */
+}
 .jp-textarea{
   scrollbar-width: thin;
   scrollbar-color: #000000 #484848;
 }
-
-/* Works on Chrome, Edge, and Safari */
 .jp-textarea::-webkit-scrollbar {
   width: 8px;
 }
-
 .jp-textarea::-webkit-scrollbar-track {
   background: #484848;
 }
-
 .jp-textarea::-webkit-scrollbar-thumb {
   background-color: 000000;
   border-radius: 10px;
   border: 2px solid #484848;
 }
-
-/* Works on Firefox */
 .jp-chat-messages{
   scrollbar-width: thin;
   scrollbar-color: #000000 #484848;
 }
-
-/* Works on Chrome, Edge, and Safari */
 .jp-chat-messages::-webkit-scrollbar {
   width: 8px;
 }
-
 .jp-chat-messages::-webkit-scrollbar-track {
   background: #484848;
 }
-
 .jp-chat-messages::-webkit-scrollbar-thumb {
   background-color: 000000;
   border-radius: 10px;
   border: 2px solid #484848;
 }
-
-
-/* Works on Firefox */
 .jp-msg-list-box{
   scrollbar-width: thin;
   scrollbar-color: #000000 #484848;
 }
-
-/* Works on Chrome, Edge, and Safari */
 .jp-msg-list-box::-webkit-scrollbar {
   width: 8px;
 }
-
 .jp-msg-list-box::-webkit-scrollbar-track {
   background: #484848;
 }
-
 .jp-msg-list-box::-webkit-scrollbar-thumb {
   background-color: 000000;
   border-radius: 10px;
