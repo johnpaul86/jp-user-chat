@@ -1,17 +1,33 @@
-jQuery(document).ready( function() {});
+jQuery(document).ready( function() {
+	
+	var jpEle = jQuery('.jp-open-chat-link').detach();
+	
+	jQuery('.jp-container').prepend(jpEle);
+	
+	jp_message_counter();
+	
+	setInterval(function() { jp_message_counter()}, 5000 );
+	
+});
 
 function jp_text_typed(ths, jpEvent){
+	console.log(jpEvent);
 	var code = (jpEvent.keyCode ? jpEvent.keyCode : jpEvent.which);
 	if (code == 13) {
 		jQuery(ths).parent().parent().find('.jp_send_btn').trigger('click');
 		return true;
 	}
 }
+
+var jp_interval = '';
+
 function jp_close_chat_window(userId){
 	
 	jQuery(".jp-chat-box-user-"+userId).remove();
 	
 	ob.splice(ob.indexOf(userId),1);
+	
+	// clearInterval(jp_interval);
 	
 }
 function jp_send_report(ths){
@@ -68,6 +84,57 @@ function jp_display_message_list(){
 	
 }
 
+function jp_message_counter(){
+	
+	var nonce = jQuery('.jp-msg-list-box').attr('data-nonce');
+	var jp_total_msgs = 0;
+	
+	jQuery.ajax({
+		type : "post",
+		dataType : "json",
+		url : jpChat.ajaxurl,
+		data : {action: "jp_message_counter", nonce: nonce},
+		success: function(response) {
+			jQuery('.jp-msg-list-box .jp-messenger .jp-message-counter').css('display','none');
+			if(response.new_messages == 'yes'){
+				jQuery.map(response.results, function(n,i){
+					
+					jQuery('[data-jp-messenger-uid="'+n.sender_id+'"]').find('.jp-message-counter').html(n.msgs);
+					jQuery('[data-jp-messenger-uid="'+n.sender_id+'"]').find('.jp-message-counter').css('display','block');
+					jp_total_msgs += parseInt(n.msgs);
+					
+					jp_update_msgStatus( n.last_id, n.sender_id );
+					
+				});
+			}
+			if( jp_total_msgs>0 ){
+				jQuery('.jp-message-bubble .jp-message-counter').html(jp_total_msgs);
+				jQuery('.jp-message-bubble .jp-message-counter').css('display','block');
+			}else{
+				jQuery('.jp-message-bubble .jp-message-counter').html('');
+				jQuery('.jp-message-bubble .jp-message-counter').css('display','none');
+			}
+		}
+	});
+}
+
+function jp_update_msgStatus(jp_mid, sender_id){
+	var nonce = jQuery('.jp-msg-list-box').attr('data-nonce');
+	
+	if(ob.includes(parseInt(sender_id)) === true){
+		
+		jQuery.ajax({
+			type : "post",
+			dataType : "json",
+			url : jpChat.ajaxurl,
+			data : {action: "jp_update_msgStatus", jp_mid : jp_mid, sender_id : sender_id, nonce : nonce},
+			success: function(response) {
+			}
+		});
+	
+	}
+}
+
 var ob = [];
 
 function jp_open_message_box( jp_send_to ){
@@ -101,10 +168,11 @@ function jp_open_message_box( jp_send_to ){
 			}, 0);
 			ob.push(jp_send_to);
 			jQuery('.jp-chat-loader').slideUp();
+			jp_message_counter();
 		}
 	});
 	
-	setInterval(function() { jp_fetchData( jp_send_to, 'interval' )}, 3000 );
+	jp_interval = setInterval(function() { jp_fetchData( jp_send_to, 'interval' )}, 3000 );
 	
 }
 function jp_fetchData( jp_send_to, triggerOn ){
@@ -131,7 +199,7 @@ function jp_fetchData( jp_send_to, triggerOn ){
 					
 					}
 					
-					jp_chatData += '<p class="jp-messages '+n.jp_className+'"><span title="'+n.jp_msgdAt+'">'+n.jp_messages+'</span>'+jp_dateString+'</p>';
+					jp_chatData += '<p class="jp-messages '+n.jp_className+'" data-msg-recd="'+n.jp_recd+'" data-msg-id="'+n.jp_msg_id+'"><span title="'+n.jp_msgdAt+'">'+n.jp_messages+'</span>'+jp_dateString+'</p>';
 					
 				});
 				

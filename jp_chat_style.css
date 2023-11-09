@@ -7,6 +7,21 @@
 	right: 0;
 	z-index: 999999;
 }
+div.jp-msg-list-box p.jp-messenger{
+	position:relative;
+}
+.jp-msg-list-box .jp-messenger .jp-message-counter{
+	position: absolute;
+    top: 0px;
+    right: 0px;
+    font-size: 11px;
+    z-index: 999999999;
+    background: red;
+    padding: 3px;
+    line-height: 11px;
+    color: #fff;
+	display:none;
+}
 .jp-chat-box{
 	float: right;
 	width: 328px;
@@ -72,6 +87,7 @@
     line-height: 10px;
     border-radius: 50%;
     color: #fff;
+	display:none;
 }
 .jp-message-bubble svg{
 	fill:#e4e6eb;
