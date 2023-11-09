@@ -84,7 +84,47 @@ function jpchat( $attr ){
 	return $jp_html_output;
 	
 }
-
+add_action( 'wp_ajax_jp_update_sender_list', 'jp_update_sender_list' );
+function jp_update_sender_list(){
+	
+	if ( !wp_verify_nonce( $_POST['nonce'], "jp_chat_nonce")) {
+		echo json_encode("No naughty business please");
+		exit;
+	}
+	
+	$nonce = wp_create_nonce("jp_chat_nonce");
+	
+	global $wpdb;
+	$jp_userId = get_current_user_id();
+	$jp_tablename = $wpdb->prefix . "jpchat";
+	$jp_results = $wpdb->get_results( 'SELECT sender_id, receiver_id FROM '.$jp_tablename.' WHERE sender_id = '.$jp_userId.' OR receiver_id = '.$jp_userId.' ORDER BY id DESC');
+	
+	$jp_users = array();
+	$jp_current_user = array();
+	$jp_current_user[] = $jp_userId;
+	
+	foreach($jp_results as $jp_result){
+		
+		$jp_users[] = $jp_result->sender_id;
+		$jp_users[] = $jp_result->receiver_id;
+		
+	}
+	$jp_users = array_diff( $jp_users, $jp_current_user );
+	
+	$jp_users = array_unique($jp_users);
+	
+	$jp_html_output = '';
+	
+	foreach( $jp_users as $jp_user ){
+		$jp_user_obj = get_userdata( $jp_user );
+		$jp_html_output .= '<p class="jp-messenger" data-jp-messenger-uid="'.$jp_user_obj->ID.'"><a onclick="jp_open_message_box('.$jp_user_obj->ID.');">'.get_avatar( $jp_user_obj->ID, 32 ).'<span class="jp-messager-name">'.$jp_user_obj->user_nicename.'</span></a><span class="jp-message-counter"></span></p>';
+	}
+	
+	echo $jp_html_output;
+	
+	exit;
+	
+}
 add_action( 'wp_head', 'jpchat_bubble' );
 function jpchat_bubble(){
 

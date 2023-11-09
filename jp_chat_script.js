@@ -101,11 +101,17 @@ function jp_message_counter(){
 					
 					jQuery('[data-jp-messenger-uid="'+n.sender_id+'"]').find('.jp-message-counter').html(n.msgs);
 					jQuery('[data-jp-messenger-uid="'+n.sender_id+'"]').find('.jp-message-counter').css('display','block');
+					jQuery('[data-jp-messenger-uid="'+n.sender_id+'"]').attr('data-jp-has-new-msgs','yes');
 					jp_total_msgs += parseInt(n.msgs);
 					
 					jp_update_msgStatus( n.last_id, n.sender_id );
 					
 				});
+				if(jQuery('[data-jp-has-new-msgs="yes"]').length != response.results.length){
+					
+					jp_update_sender_list();
+					
+				}
 			}
 			if( jp_total_msgs>0 ){
 				jQuery('.jp-message-bubble .jp-message-counter').html(jp_total_msgs);
@@ -117,7 +123,19 @@ function jp_message_counter(){
 		}
 	});
 }
-
+function jp_update_sender_list(){
+	var nonce = jQuery('.jp-msg-list-box').attr('data-nonce');
+	jQuery.ajax({
+		type : "post",
+		dataType : "html",
+		url : jpChat.ajaxurl,
+		data : {action: "jp_update_sender_list", nonce : nonce},
+		success: function(response) {
+			jQuery('.jp-msg-list-box').html(response);
+			jp_message_counter();
+		}
+	});
+}
 function jp_update_msgStatus(jp_mid, sender_id){
 	var nonce = jQuery('.jp-msg-list-box').attr('data-nonce');
 	
