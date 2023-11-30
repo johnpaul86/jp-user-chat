@@ -103,32 +103,48 @@ function jpchat_theme_cb( $args ) {
 }
 
 function jpchat_restrict_users_cb( $args ) {
+	
 	// Get the value of the setting we've registered with register_setting()
 	$options = get_option( 'jpchat_options' );
 
 	global $wp_roles;
 	$roles = $wp_roles->roles;
+	$selected_roles = array();
 	
-	$selected_roles = $options[esc_attr( $args['label_for'] )];
+	if(isset($options[esc_attr( $args['label_for'] )])){
+		
+		$selected_roles = $options[esc_attr( $args['label_for'] )];
+	
+	}
 	
 	?>
 	<select name="jpchat_options[<?php echo esc_attr( $args['label_for'] ); ?>][]" id="jp-restrict-users" data-custom="<?php echo esc_attr( $args['jpchat_custom_data'] ); ?>" multiple>
 	<?php
+	
 	$selected = '';
+	
 	foreach( $roles as $key => $role ){
+		
 		if(in_array( $role['name'], $selected_roles )){
+			
 			$selected = 'selected';
+			
 		}
+		
 		?>
 		<option <?php echo $selected; ?>>
 		<?php esc_html_e( $role['name'], 'jpchat' ); ?>
 		</option>
 		<?php
+		
 		$selected = '';
+		
 		}
+		
 	?>
 	</select>';
 <?php
+
 }
 
 /**
@@ -195,8 +211,10 @@ function jpchat_options_page_html() {
 		</div>
 		<?php }else{ echo "<p>Database tables don't exists! Please deactivate and activate the plugin to re-create the tables.</p>"; }?>
 	</div>
+	
 	<script>
 		function clear_jp_chat(){
+			/*Function to clear the existing chat history*/
 			if (confirm("This will clear all the chat history, Would you like to proceed further?") == true) {
 				jQuery.ajax({
 					type : "post",
@@ -211,7 +229,9 @@ function jpchat_options_page_html() {
 				});
 			}
 		}
+		
 		function drop_jp_tables(){
+			/*This function will delete the custom tables created by this plugin*/
 			if (confirm("This will delete the jp-chat database tables, Would you like to proceed further?") == true) {
 				jQuery.ajax({
 					type : "post",
@@ -233,6 +253,7 @@ function jpchat_options_page_html() {
 }
 
 function clear_jp_chat(){
+	/*function to empty both tables. This will erase the chat history*/
 	global $wpdb;
 	$jp_tablename = $wpdb->prefix . "jpchat";
 	$result = $wpdb->query($wpdb->prepare('TRUNCATE TABLE '.$jp_tablename));
@@ -245,6 +266,7 @@ function clear_jp_chat(){
 add_action( 'wp_ajax_clear_jp_chat', 'clear_jp_chat' );
 
 function drop_jp_tables(){
+	/*function to empty delete tables. This will erase the chat history*/
 	global $wpdb;
 	$jp_tablename = $wpdb->prefix . "jpchat";
 	$result = $wpdb->query($wpdb->prepare('DROP TABLE '.$jp_tablename));
