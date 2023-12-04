@@ -7,22 +7,12 @@ Version: 1.0.0
 Requires at least: 5.5
 Requires PHP: 7.0
 Author: John Paul O B
-Author URI: https://john@derniertec.biz
+Author URI: https://johnpaul.derniertec.biz
 Text Domain: jp-chat
 
- JPChat is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * any later version.
- *
  * JPChat is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JPChat. If not, see <https://www.gnu.org/licenses/>
- 
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 */
 
 // Exit if accessed directly.
