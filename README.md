@@ -1,1 +1,1 @@
-"# jp-user-chat" 
+"# jp-user-chat" is a WordPress plugin to integrate chat functionality within a WordPress user system. More details about this plugin and it's usage is mentioned here : https://derniertec.biz/plugins/jp-user-chat/
