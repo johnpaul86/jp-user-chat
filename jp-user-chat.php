@@ -2,13 +2,15 @@
 /*
 Plugin Name: JP User Chat
 Plugin URI: https://www.derniertec.biz/plugins/jp-user-chat
-Description: This plugin intergrate the chat feature among WordPress users with shortcode. Create chat button will display if shortcode is added. Chat bubble will dispay if plugin is activated.
+Description: This plugin intergrate the chat feature among WordPress users with shortcode. "Create chat button" will display if shortcode is added. Chat bubble will be displayed if the plugin is activated. This plugin works only for logged-in users.
 Version: 1.0.0
-Requires at least: 5.5
-Requires PHP: 7.0
+Requires at least: 4.7
+Requires PHP: 5.6
 Author: John Paul O B
 Author URI: https://johnpaul.derniertec.biz
-Text Domain: jp-chat
+Text Domain: jp-user-chat
+License: GPLv2
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
  * JPChat is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -35,6 +37,7 @@ require_once plugin_dir_path(__FILE__) . 'jp-ajax-functions.php';
 function jpChat_activate(){
 	global $wpdb;
 	require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+	/*We are creating custom tables on plugin activation*/
 	$sql="
 	CREATE TABLE IF NOT EXISTS `".$wpdb->prefix."jpchat`
 	(
@@ -65,6 +68,7 @@ register_activation_hook( __FILE__, 'jpChat_activate' );
 
 function jpChat_uninstall(){
 	// global $wpdb;
+	/*Deleting the custom tables. This feature is moved to the plugin settings page*/
 	// $wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}jpchat" );
 	// $wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}jpchat_blockings" );
 	delete_option( 'jpchat_options' );
@@ -73,6 +77,7 @@ register_uninstall_hook( __FILE__, 'jpChat_uninstall' );
 
 function my_script_enqueuer() {
 	if ( is_user_logged_in() ) {
+		/*We need to include these files only if the user is logged in*/
 		wp_register_script( "jp_chat_script", plugin_dir_url( __FILE__ ).'/jp_chat_script.js', array('jquery'), JPCHAT_VERSION );
 		wp_localize_script( 'jp_chat_script', 'jpChat', array( 'ajaxurl' => admin_url( 'admin-ajax.php' )));        
 		wp_enqueue_script( 'jquery' );
@@ -83,6 +88,8 @@ function my_script_enqueuer() {
 add_action( 'wp_enqueue_scripts', 'my_script_enqueuer' );
 
 function jpuser_canaccess(){
+	
+	/*Retrieving the values saved in plugin settings page*/
 	
 	$options = get_option( 'jpchat_options' );
 	
@@ -97,6 +104,8 @@ function jpuser_canaccess(){
 	global $current_user;
 
     $user_roles = $current_user->roles;
+	
+	/*get the current user role*/
 	
     $user_role = array_shift($user_roles);
 	
@@ -119,13 +128,28 @@ function jpchat( $attr ){
 		return;
 	}
 	$default_atts = array(
-        'sender_id' => get_the_author_ID()
+        'user_id' => get_current_user_id(),
+        'button_type' => 'default',
+        'label' => 'Send Message'
     );
 	$atts = shortcode_atts( $default_atts, $attr, 'jpchat' );
-	$sender_id = $atts['sender_id'];
+	$user_id = $atts['user_id'];
+	$button_type = $atts['button_type'];
+	$label = $atts['label'];
+	
 	$jp_html_output = '';
-	if(!empty($sender_id) && $sender_id != get_current_user_id()){
-		$jp_html_output .= '<a class="jp-open-chat-link" onclick="jp_open_message_box('.$sender_id.');"></a>';
+	if(!empty($user_id) && $user_id != get_current_user_id()){
+		if($button_type == 'default'){
+			$jp_html_output .= '<a class="jp-open-chat-link" onclick="jp_open_message_box('.$user_id.');"></a>';
+		}else if($button_type == 'button'){
+			$jp_html_output .= '<button class="jpchat-custom-button" onclick="jp_open_message_box('.$user_id.');">'.$label.'</button>';
+		}else if($button_type == 'bootstrap'){
+			$jp_html_output .= '<input type="button" class="btn btn-primary jpchat-bootstrap-button" onclick="jp_open_message_box('.$user_id.');" value="'.$label.'"/>';
+		}else if($button_type == 'link'){
+			$jp_html_output .= '<a class="jpchat-custom-link" onclick="jp_open_message_box('.$user_id.');">'.$label.'</a>';
+		}else{
+			$jp_html_output .= '<a class="jp-open-chat-link" onclick="jp_open_message_box('.$user_id.');"></a>';
+		}
 	}
 	return $jp_html_output;
 }
@@ -141,9 +165,10 @@ function jpchat_bubble(){
 		}
 		global $wpdb;
 		$jp_userId = get_current_user_id();
-		$jp_tablename = $wpdb->prefix . "jpchat";
-		$jp_results = $wpdb->get_results( 'SELECT sender_id, receiver_id FROM '.$jp_tablename.' WHERE sender_id = '.$jp_userId.' OR receiver_id = '.$jp_userId.' ORDER BY id DESC');
-		$jp_results_count = $wpdb->get_results( 'SELECT id FROM '.$jp_tablename.' WHERE receiver_id = '.$jp_userId.' AND recd = "0"');
+		$jp_results = $wpdb->get_results( $wpdb->prepare( "SELECT sender_id, receiver_id FROM {$wpdb->prefix}jpchat WHERE sender_id = %d OR receiver_id = %d ORDER BY id DESC", $jp_userId, $jp_userId ) );
+		
+		$jp_results_count = $wpdb->get_results( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}jpchat WHERE receiver_id = %d AND recd = '0'", $jp_userId ) );
+		
 		$jp_users = array();
 		$jp_current_user = array();
 		$jp_current_user[] = $jp_userId;
@@ -169,7 +194,9 @@ function jpchat_bubble(){
 		$jp_html_output .= '<div class="jp-msg-list-box jpchat-theme-'.$jpchatTheme.'" data-nonce="'.$nonce.'">';
 		foreach( $jp_users as $jp_user ){
 			$jp_user_obj = get_userdata( $jp_user );
-			$jp_html_output .= '<p class="jp-messenger" data-jp-messenger-uid="'.$jp_user_obj->ID.'"><a onclick="jp_open_message_box('.$jp_user_obj->ID.');">'.get_avatar( $jp_user_obj->ID, 32 ).'<span class="jp-messager-name">'.$jp_user_obj->user_nicename.'</span></a><span class="jp-message-counter"></span></p>';
+			if( isset( $jp_user_obj ) && $jp_user_obj != false && intval($jp_user_obj->ID)!= '0' ){
+				$jp_html_output .= '<p class="jp-messenger" data-jp-messenger-uid="'.$jp_user_obj->ID.'"><a onclick="jp_open_message_box('.$jp_user_obj->ID.');">'.get_avatar( $jp_user_obj->ID, 32 ).'<span class="jp-messager-name">'.$jp_user_obj->user_nicename.'</span></a><span class="jp-message-counter"></span></p>';
+			}
 		}
 		$jp_html_output .= '</div>';
 
@@ -195,8 +222,7 @@ add_action( 'wp_head', 'jpchat_bubble' );
 function check_blocked($receiver_id){
 	global $wpdb;
 	$block_user_id = intval( get_current_user_id() );
-	$jp_tablename = $wpdb->prefix . "jpchat_blockings";
-	$jp_results = $wpdb->get_results( 'SELECT * FROM '.$jp_tablename.' WHERE block_user_id = '.$block_user_id.' AND receiver_id = '.$receiver_id.' AND status = 1' );
+	$jp_results = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}jpchat_blockings WHERE block_user_id = %d AND receiver_id = %d AND status = 1" , $block_user_id, $receiver_id ) );
 	if( count($jp_results) > 0 ){
 		return true;
 	}else{

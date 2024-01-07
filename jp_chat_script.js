@@ -111,7 +111,7 @@ function jp_display_message_list(){
 
 function jp_message_counter(){
 	
-	/*this function fetchs the new messages bubbles*/
+	/*this function fetches the new messages bubbles*/
 	var nonce = jQuery('.jp-msg-list-box').attr('data-nonce');
 	var jp_total_msgs = 0;
 	
@@ -135,7 +135,7 @@ function jp_message_counter(){
 					
 				});
 				
-				if(jQuery('[data-jp-has-new-msgs="yes"]').length != response.results.length){
+				if( jQuery('[data-jp-has-new-msgs="yes"]').length != response.results.length ){
 					
 					jp_update_sender_list();
 					

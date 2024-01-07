@@ -105,6 +105,7 @@ div.jp-msg-list-box p.jp-messenger{
 	width: 35px;
     height: 35px;
 	box-sizing: border-box;
+	line-height:17px;
 }
 .jp-msg-list-box{
 	max-height: 400px;
@@ -168,6 +169,7 @@ div.jp-msg-list-box .avatar{
 	float:right;
 	margin-right:5px;
 	box-sizing: border-box;
+	line-height:15px;
 }
 .jp-chat-box .jp-chat-header .jp-block-btn.jp-header-btns{
 	background-image:url('block-button.png');
@@ -238,11 +240,12 @@ div.jp-msg-list-box .avatar{
 	float:right;
 	display: block; 
 	position: relative; 
-	padding-left: 20px;
+	margin-right:15px;
     margin-top: 8px;
 	cursor: pointer; 
-	font-size: 20px;
-	line-height:20px;
+	font-size: 15px;
+    line-height: 15px;
+    font-weight: bold;
 } 
 .jp-open-chat-link{
 	background-image:url('edit-button.svg');
@@ -363,8 +366,8 @@ div.jp-msg-list-box .avatar{
 	color:#fff;
 }
 .jp-display-when .jp-custom-checkbox:after { 
-	left: 1px;
-    bottom: 15px;
+	left: 4px;
+    top: 2px;
     width: 6px;
     height: 5px;
     color: #999999;
